@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from ImportImage import import_image
+
 
 class FlexibleNeuralNetwork:
     def __init__(self, activation):
@@ -35,45 +37,70 @@ class FlexibleNeuralNetwork:
 # Essayez avec différentes activations
 network1 = FlexibleNeuralNetwork(activation='sigmoid')
 inputs = np.array([0.8, 0.5, 1])
+
+inputs = import_image.import_image_npy("Numbers/number.npy")
+
 print("Entrees:", inputs)
 network1.initialize_weights(len(inputs))
 
 # Premier réseau de neurones
 layer = [None] * 4
-for i in range(4):
+for i in range(128):
     # Réinitialiser les poids et le biais pour chaque itération
     network1.initialize_weights(len(inputs))
     
     # Calculer la sortie
     sortie = network1.forward(inputs)
-    print("layer 1, neuronne", i, ":", sortie)
+    # print("layer 1, neuronne", i, ":", sortie)
     layer[i] = network1.forward(inputs).item()
 
-print(layer)
+# print(layer)
 
 # deuxième réseau de neurones
 network2 = FlexibleNeuralNetwork(activation='relu')
 inputs = layer
 layer2 = [None] * 4
-for i in range(4):
+for i in range(64):
     # Réinitialiser les poids et le biais pour chaque itération
     network2.initialize_weights(len(inputs))
     
     # Calculer la sortie
     sortie = network2.forward(inputs)
-    print("layer 2, neuronne", i, ":", sortie)
+    # print("layer 2, neuronne", i, ":", sortie)
     layer2[i] = network2.forward(inputs).item()
 
-print(layer2)
+# print(layer2)
 
-# Visualisation des sorties des couches
-plt.figure(figsize=(10, 6))     
+# Sortie
+network3 = FlexibleNeuralNetwork(activation='relu')
+inputs = layer2
+layer3 = [None] * 4
+for i in range(10):
+    # Réinitialiser les poids et le biais pour chaque itération
+    network3.initialize_weights(len(inputs))
+    
+    # Calculer la sortie
+    sortie = network3.forward(inputs)
+    # print("layer 3, neuronne", i, ":", sortie)
+    layer3[i] = network3.forward(inputs).item()
+# print(layer3)
 
-for i in range(4):
-    plt.plot(layer[i], label=f'Layer {i+1} ({network1.activation})')
-plt.title('Sorties des couches avec activation ' + network1.activation)
-plt.xlabel('Index de la couche')
-plt.ylabel('Valeur de sortie')
-plt.legend()
-plt.grid(True)
-plt.show()
+
+# Affichage des sorties finales
+print("Sorties finales des couches:")
+print("Layer 1:", layer)
+print("Layer 2:", layer2)
+print("Layer 3:", layer3)
+
+
+# # Visualisation des sorties des couches
+# plt.figure(figsize=(10, 6))     
+
+# for i in range(4):
+#     plt.plot(layer[i], label=f'Layer {i+1} ({network1.activation})')
+# plt.title('Sorties des couches avec activation ' + network1.activation)
+# plt.xlabel('Index de la couche')
+# plt.ylabel('Valeur de sortie')
+# plt.legend()
+# plt.grid(True)
+# plt.show()
