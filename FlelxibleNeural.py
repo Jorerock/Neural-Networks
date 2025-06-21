@@ -4,8 +4,9 @@ from ImportImage import import_image
 
 
 class FlexibleNeuralNetwork:
-    def __init__(self, activation):
+    def __init__(self, activation , number_0f_neurons):
         self.activation = activation
+        self.number_0f_neurons = number_0f_neurons
         
     def initialize_weights(self, input_size):
         self.weights = np.random.randn(input_size, 1)
@@ -34,18 +35,46 @@ class FlexibleNeuralNetwork:
         
         
 
-# Essayez avec différentes activations
-network1 = FlexibleNeuralNetwork(activation='sigmoid')
-inputs = np.array([0.8, 0.5, 1])
 
+# # Classe pour créer des couches de neurones flexibles
+# class layers:
+#     def __init__(self, activation, number_0f_neurons):
+#         self.activation = activation
+#         self.number_0f_neurons = number_0f_neurons
+#         self.network = FlexibleNeuralNetwork(activation, number_0f_neurons)
+  
+#     def Result(self, inputs):
+#         for i in range(self.number_0f_neurons):
+#             # Réinitialiser les poids et le biais pour chaque itération
+#             self.network.initialize_weights(len(inputs))
+            
+#             # Calculer la sortie
+#             sortie = self.network.forward(inputs)
+#             # print("layer 1, neuronne", i, ":", sortie)
+#             layer[i] = self.network.forward(inputs).item()
+
+#         return layer
+    
+    
+
+
+
+
+
+# Importer l'image et la normaliser
+import_image = import_image()
 inputs = import_image.import_image_npy("Numbers/number.npy")
+# inputs = import_image.import_image_png("Numbers/number.png")
+inputs = inputs.flatten()  # Aplatir l'image en un vecteur
+inputs = inputs / 255.0  # Normaliser les valeurs des pixels entre 0 et 1
 
-print("Entrees:", inputs)
-network1.initialize_weights(len(inputs))
+# Afficher les entrées
+print("Entrées normalisées:", inputs)
+network1 = FlexibleNeuralNetwork(activation='sigmoid',number_0f_neurons=128)
 
 # Premier réseau de neurones
-layer = [None] * 4
-for i in range(128):
+layer = [None] * network1.number_0f_neurons
+for i in range(network1.number_0f_neurons):
     # Réinitialiser les poids et le biais pour chaque itération
     network1.initialize_weights(len(inputs))
     
@@ -57,10 +86,10 @@ for i in range(128):
 # print(layer)
 
 # deuxième réseau de neurones
-network2 = FlexibleNeuralNetwork(activation='relu')
+network2 = FlexibleNeuralNetwork(activation='relu',number_0f_neurons=64)
 inputs = layer
-layer2 = [None] * 4
-for i in range(64):
+layer2 = [None] * network2.number_0f_neurons
+for i in range(network2.number_0f_neurons):
     # Réinitialiser les poids et le biais pour chaque itération
     network2.initialize_weights(len(inputs))
     
@@ -72,10 +101,10 @@ for i in range(64):
 # print(layer2)
 
 # Sortie
-network3 = FlexibleNeuralNetwork(activation='relu')
+network3 = FlexibleNeuralNetwork(activation='relu',number_0f_neurons=10)
 inputs = layer2
-layer3 = [None] * 4
-for i in range(10):
+layer3 = [None] * network3.number_0f_neurons
+for i in range(network3.number_0f_neurons):
     # Réinitialiser les poids et le biais pour chaque itération
     network3.initialize_weights(len(inputs))
     
