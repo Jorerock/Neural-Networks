@@ -2,9 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from ImportImage import import_image
 
-
-
-
 class Neuronne:
     def __init__(self, activation):
         self.activation = activation
@@ -16,16 +13,13 @@ class Neuronne:
             return np.maximum(0, x)
         elif self.activation == 'tanh':
             return np.tanh(x)
-        # elif self.activation == 'softmax':
-        #     exp_x = np.exp(x - np.max(x))
-        #     return exp_x / exp_x.sum(axis=0, keepdims=True)
         else:
             raise ValueError("Activation non supportée")
     
     def forward(self, inputs,weight,bias):
         Sommepondere = np.dot(inputs, weight) + bias #produit des Vecteurs de matrices
         output = self.choose_activation(Sommepondere)
-        return output
+        return output ,Sommepondere 
 
 class layers:
     def __init__(self, activation, number_of_neurons):
@@ -35,9 +29,12 @@ class layers:
 
     def Result(self, inputs,weights, bias):
         result = [] 
+        z_values = [] #Matrice des mes Sommes ponderes
         for i in range(self.number_of_neurons):
-            result.append(self.network.forward(inputs,weights[:, i] ,bias[i]))
-        return np.array(result)
+            output , Sommepondere  = self.network.forward(inputs,weights[:, i] ,bias[i])
+            result.append(output)
+            z_values.append(Sommepondere)
+        return np.array(result),np.array(z_values)
 
 class NeuralNetwork:
     def __init__(self,inputs_size = 784  ,numberofLayer = 3 ,Layer_neurons_and_activation = [('sigmoid', 128), ('relu', 64), ('relu', 10)]):
@@ -46,6 +43,9 @@ class NeuralNetwork:
         self.weights = []
         self.biases = []
         self.Initialise_weights_and_bias(inputs_size)
+        self.inputs= []
+        self.z_values = []
+        self.output= []
         
 
     def Initialise_weights_and_bias(self,inputs_size):
@@ -60,22 +60,33 @@ class NeuralNetwork:
         print("Poids et biais initialisés:")
         for i in range(self.numberofLayer):
             print(f"Couche {i+1}: weights {self.weights[i].shape}, bias {self.biases[i].shape}")
+
+
     
     def Go(self, inputs):
+        self.inputs= []
+        self.z_values = []
+        self.output= []
         current_inputs = inputs
         for i in range(self.numberofLayer):
             layer = layers(
             activation=self.Layer_neurons_and_activation[i][0], 
             number_of_neurons=self.Layer_neurons_and_activation[i][1]
             )
-            current_inputs = layer.Result(current_inputs, self.weights[i], self.biases[i])    
+            self.inputs.append(current_inputs)
+            current_inputs , z_values = layer.Result(current_inputs, self.weights[i], self.biases[i])
+            self.z_values.append(z_values)
+            self.output.append(current_inputs)
+   
 
-            # inputs = self.layers[i].Result(inputs)
-        #une fonction softmax pour la dernière couche de sortie
+        derniere_sortie = self.output[-1]  # Dernière couche
+        gradient_poids = np.outer(self.inputs[-1], Graditant(derniere_sortie, y_true) * relu_derivative(self.z_values[-1]))
+        print("Gradient des poids : ",gradient_poids)
+        gradient_biais = Graditant(derniere_sortie, y_true) * relu_derivative(self.z_values[-1])
+        print("Gradient des biais  : ",gradient_biais)
 
-        # exp_x = np.exp(inputs - np.max(inputs))
-        # return exp_x / exp_x.sum(axis=0, keepdims=True)
         return current_inputs
+
 
 
 
@@ -88,26 +99,29 @@ inputs = inputs.flatten()  # Aplatir l'image en un vecteur
 inputs = inputs / 255.0  # Normaliser les valeurs des pixels entre 0 et 1
 
 
+#dit 
+def cross_entropy(y_pred, y_true):
+    return -np.sum(y_true * np.log(y_pred + 1e-9))
+
+def Graditant(y_pred, y_true):
+    return y_pred-y_true
+
+
+def relu_derivative(z):
+    return np.where(z > 0, 1, 0) #si z > 0 alors dérivée = 1, sinon dérivée = 0 pour chaque valeur de mon tableau
+
+# def Deriver_Partiel(Weights,valeur,Bias,Somepondere,function, Coss):
 print("Parametrage reseau:")
 NeuralNetwork1 = NeuralNetwork(inputs_size = 784, numberofLayer=3, Layer_neurons_and_activation=[('sigmoid', 128), ('relu', 64), ('relu', 10)])
-# sbiais et poids  784*128 +128 *64 + 64*10 et 128+63+10 biases
-
+# sbiais et poids  784*128 +128 *64 + 64*10 poids et 128+63+10 biases
 print("\nGo:",)
-y_true = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0]  # 4 est la reponse juste
-# loss = -np.sum(true * np.log(resultat + 1e-9))
-Loss = []
-for i in range(3):
+y_true = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0]  # 4 est la reponse juste pour l'image actuelle
+
+for i in range(1):
     resultat = (NeuralNetwork1.Go(inputs))
     print(resultat)
     for i in range(resultat.shape[0]):
         print(f"{i}: {resultat[i]*100:.2f}%")
-        Loss(resultat,y_true)
-
-
-#dit cross entropy
-def Loss(y_pred, y_true):
-    return -np.sum(y_true * np.log(y_pred + 1e-9))
-    
 
 
 
