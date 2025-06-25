@@ -46,6 +46,9 @@ class NeuralNetwork:
         self.inputs= []
         self.z_values = []
         self.output= []
+        self.gradients_poids = []  # Liste de matrices
+        self.gradients_biais = []  # Liste de vecteurs
+        self.deltas = []
         
 
     def Initialise_weights_and_bias(self,inputs_size):
@@ -57,26 +60,43 @@ class NeuralNetwork:
             self.weights.append(weights)
             self.biases.append(bias)
             prev_size = num_neurons
-        print("Poids et biais initialisés:")
-        for i in range(self.numberofLayer):
-            print(f"Couche {i+1}: weights {self.weights[i].shape}, bias {self.biases[i].shape}")
+        # print("Poids et biais initialisés:")
+        # for i in range(self.numberofLayer):
+            # print(f"Couche {i+1}: weights {self.weights[i].shape}, bias {self.biases[i].shape}")
 
     def Gradiant_layer(self,layer_Number,activation,delta_from_next_layer):
-        
-        gradient_poids =[]
-        gradient_biais =[]
-        sortie = self.output[layer_Number]
         if(activation == "relu"):
-            gradient_poids = np.outer(self.inputs[layer_Number], Graditant(sortie, delta_from_next_layer) * relu_derivative(self.z_values[layer_Number]))
-            print("layer : ",layer_Number ,"Gradient des poids : ",gradient_poids)
-            gradient_biais = Graditant(sortie, delta_from_next_layer) * relu_derivative(self.z_values[layer_Number])
-            print("Gradient des biais  : ",gradient_biais)
+            gradient_poids = np.outer(self.inputs[layer_Number], delta_from_next_layer * relu_derivative(self.z_values[layer_Number]))
+            # print("layer : ",layer_Number ,"Gradient des poids : ",gradient_poids)
+            gradient_biais = delta_from_next_layer * relu_derivative(self.z_values[layer_Number])
+            # print("Gradient des biais  : ",gradient_biais)
         elif (activation == "sigmoid"):
-            gradient_poids = np.outer(self.inputs[layer_Number], Graditant(sortie, delta_from_next_layer) * sigmoid_derivative(self.z_values[layer_Number]))
-            print("Gradient des poids : ",gradient_poids)
-            gradient_biais = Graditant(sortie, delta_from_next_layer) * sigmoid_derivative(self.z_values[layer_Number])
-            print("Gradient des biais  : ",gradient_biais)
+            gradient_poids = np.outer(self.inputs[layer_Number], delta_from_next_layer * sigmoid_derivative(self.z_values[layer_Number]))
+            # print("Gradient des poids : ",gradient_poids)
+            gradient_biais = delta_from_next_layer * sigmoid_derivative(self.z_values[layer_Number])
+            # print("Gradient des biais  : ",gradient_biais)
         return gradient_poids , gradient_biais
+    
+
+    def Calc_Delta(self, y_true):
+        self.deltas = []
+        #delta de la derniere couche
+        derniere_sortie = self.output[-1]  # Dernière couche
+        activation_derniere = self.Layer_neurons_and_activation[-1][0]
+        if activation_derniere == "relu":
+            delta = Delta(derniere_sortie, y_true) * relu_derivative(self.z_values[-1])
+        elif activation_derniere == "sigmoid":
+            delta = Delta(derniere_sortie, y_true) * sigmoid_derivative(self.z_values[-1])
+        self.deltas.append(delta)
+        #on remonte les couches
+        for layer in range(self.numberofLayer-2, -1, -1):  
+            if(self.Layer_neurons_and_activation[layer][0] == "relu"):
+                delta_precedent = delta.dot(self.weights[layer+1].T) * relu_derivative(self.z_values[layer])
+                self.deltas.insert(0, delta_precedent) 
+            elif (self.Layer_neurons_and_activation[layer][0] == "sigmoid"):
+                delta_precedent = delta.dot(self.weights[layer+1].T) * sigmoid_derivative(self.z_values[layer])
+                self.deltas.insert(0, delta_precedent) 
+            delta = delta_precedent 
 
     
     def Go(self, inputs):
@@ -94,13 +114,38 @@ class NeuralNetwork:
             self.z_values.append(z_values)
             self.output.append(current_inputs)
    
-        y_true = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0]  # 4 est la reponse juste pour l'image actuelle
-        derniere_sortie = self.output[-1]  # Dernière couche
-        gradient_poids = np.outer(self.inputs[-1], Graditant(derniere_sortie, y_true) * relu_derivative(self.z_values[-1]))
-        print("Gradient des poids : ",gradient_poids)
-        gradient_biais = Graditant(derniere_sortie, y_true) * relu_derivative(self.z_values[-1])
-        print("Gradient des biais  : ",gradient_biais)
+        # y_true = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0]  # 4 est la reponse juste pour l'image actuelle
+        # derniere_sortie = self.output[-1]  # Dernière couche
+        # delta =  Delta(derniere_sortie, y_true)
+        # self.deltas.append(delta)
 
+
+        # gradient_poids = np.outer(self.inputs[-1], Delta(derniere_sortie, y_true) * relu_derivative(self.z_values[-1]))
+        # # print("Gradient des poids : ",gradient_poids)
+        # gradient_biais = Delta(derniere_sortie, y_true) * relu_derivative(self.z_values[-1])
+        # # print("Gradient des biais  : ",gradient_biais)
+
+
+
+        # for layer in range(self.numberofLayer-1, 0, -1):
+        #     grad_w, grad_b = self.Gradiant_layer(layer_Number = layer,activation = self.Layer_neurons_and_activation[layer][0] ,delta_from_next_layer=self.delta[layer+1])
+        #     self.gradients_poids.append(grad_w)
+        #     self.gradients_biais.append(grad_b)
+        self.Calc_Delta(y_true=[0, 0, 0, 0, 1, 0, 0, 0, 0, 0])
+
+
+        self.gradients_poids = []
+        self.gradients_biais = []
+
+        # Calculer tous les gradients en utilisant les deltas
+        for layer in range(self.numberofLayer):
+            activation = self.Layer_neurons_and_activation[layer][0]
+            grad_w, grad_b = self.Gradiant_layer(layer, activation, self.deltas[layer])
+            self.gradients_poids.append(grad_w)
+            self.gradients_biais.append(grad_b)
+        
+        # print(self.gradients_biais)
+        
         return current_inputs
 
 
@@ -119,7 +164,7 @@ inputs = inputs / 255.0  # Normaliser les valeurs des pixels entre 0 et 1
 def cross_entropy(y_pred, y_true):
     return -np.sum(y_true * np.log(y_pred + 1e-9))
 
-def Graditant(y_pred, y_true):
+def Delta(y_pred, y_true):
     return y_pred-y_true
 
 
@@ -139,7 +184,7 @@ print("\nGo:",)
 
 for i in range(1):
     resultat = (NeuralNetwork1.Go(inputs))
-    print(resultat)
+    # print(resultat)
     for i in range(resultat.shape[0]):
         print(f"{i}: {resultat[i]*100:.2f}%")
 
