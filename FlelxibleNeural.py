@@ -61,6 +61,22 @@ class NeuralNetwork:
         for i in range(self.numberofLayer):
             print(f"Couche {i+1}: weights {self.weights[i].shape}, bias {self.biases[i].shape}")
 
+    def Gradiant_layer(self,layer_Number,activation,delta_from_next_layer):
+        
+        gradient_poids =[]
+        gradient_biais =[]
+        sortie = self.output[layer_Number]
+        if(activation == "relu"):
+            gradient_poids = np.outer(self.inputs[layer_Number], Graditant(sortie, delta_from_next_layer) * relu_derivative(self.z_values[layer_Number]))
+            print("layer : ",layer_Number ,"Gradient des poids : ",gradient_poids)
+            gradient_biais = Graditant(sortie, delta_from_next_layer) * relu_derivative(self.z_values[layer_Number])
+            print("Gradient des biais  : ",gradient_biais)
+        elif (activation == "sigmoid"):
+            gradient_poids = np.outer(self.inputs[layer_Number], Graditant(sortie, delta_from_next_layer) * sigmoid_derivative(self.z_values[layer_Number]))
+            print("Gradient des poids : ",gradient_poids)
+            gradient_biais = Graditant(sortie, delta_from_next_layer) * sigmoid_derivative(self.z_values[layer_Number])
+            print("Gradient des biais  : ",gradient_biais)
+        return gradient_poids , gradient_biais
 
     
     def Go(self, inputs):
@@ -78,7 +94,7 @@ class NeuralNetwork:
             self.z_values.append(z_values)
             self.output.append(current_inputs)
    
-
+        y_true = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0]  # 4 est la reponse juste pour l'image actuelle
         derniere_sortie = self.output[-1]  # Dernière couche
         gradient_poids = np.outer(self.inputs[-1], Graditant(derniere_sortie, y_true) * relu_derivative(self.z_values[-1]))
         print("Gradient des poids : ",gradient_poids)
@@ -110,12 +126,16 @@ def Graditant(y_pred, y_true):
 def relu_derivative(z):
     return np.where(z > 0, 1, 0) #si z > 0 alors dérivée = 1, sinon dérivée = 0 pour chaque valeur de mon tableau
 
+def sigmoid_derivative(z):
+    sigmoid_z = 1 / (1 + np.exp(-z))
+    return sigmoid_z * (1 - sigmoid_z)
+
 # def Deriver_Partiel(Weights,valeur,Bias,Somepondere,function, Coss):
 print("Parametrage reseau:")
 NeuralNetwork1 = NeuralNetwork(inputs_size = 784, numberofLayer=3, Layer_neurons_and_activation=[('sigmoid', 128), ('relu', 64), ('relu', 10)])
 # sbiais et poids  784*128 +128 *64 + 64*10 poids et 128+63+10 biases
 print("\nGo:",)
-y_true = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0]  # 4 est la reponse juste pour l'image actuelle
+
 
 for i in range(1):
     resultat = (NeuralNetwork1.Go(inputs))
