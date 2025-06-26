@@ -3,4 +3,7 @@ since I've finished my HND exams
 
 
 
-Launche App.py
+Launch App.py
+
+
+Thanks to Grant Sanderson (3blue1brown) for the theory.
