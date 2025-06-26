@@ -136,38 +136,37 @@ class NeuralNetwork:
 
     
     def Go(self, inputs):
-        print("go")
         self.inputs= []
         self.z_values = []
-        self.output= []
+
         current_inputs = inputs
         for i in range(self.numberofLayer):
             layer = layers(
             activation=self.Layer_neurons_and_activation[i][0], 
             number_of_neurons=self.Layer_neurons_and_activation[i][1]
             )
-            self.inputs.append(current_inputs)
             current_inputs , z_values = layer.Result(current_inputs, self.weights[i], self.biases[i])
             self.z_values.append(z_values)
-            self.output.append(current_inputs)
+
    
-        self.Calc_Delta(y_true=[0, 0, 0, 0, 1, 0, 0, 0, 0, 0])
-        self.gradients_poids = []
-        self.gradients_biais = []
+        # self.Calc_Delta(y_true=[0, 0, 0, 0, 1, 0, 0, 0, 0, 0])
+        # self.gradients_poids = []
+        # self.gradients_biais = []
         # Calculer tous les gradients en utilisant les deltas
-        for layer in range(self.numberofLayer):
-            activation = self.Layer_neurons_and_activation[layer][0]
-            grad_w, grad_b = self.Gradiant_layer(layer, activation, self.deltas[layer])
-            self.gradients_poids.append(grad_w)
-            self.gradients_biais.append(grad_b)
+        # for layer in range(self.numberofLayer):
+        #     activation = self.Layer_neurons_and_activation[layer][0]
+        #     grad_w, grad_b = self.Gradiant_layer(layer, activation, self.deltas[layer])
+        #     self.gradients_poids.append(grad_w)
+        #     self.gradients_biais.append(grad_b)
         
-        for i in range(self.numberofLayer):
-            self.weights[i] -= self.learning_rate * self.gradients_poids[i]
-            self.biases[i] -= self.learning_rate * self.gradients_biais[i]
+        # for i in range(self.numberofLayer):
+        #     self.weights[i] -= self.learning_rate * self.gradients_poids[i]
+        #     self.biases[i] -= self.learning_rate * self.gradients_biais[i]
         # print(self.gradients_biais)
         return current_inputs
     
     def training(self, batch_x,batch_y):
+
         self.inputs= []
         self.z_values = []
         self.output= []
@@ -181,7 +180,6 @@ class NeuralNetwork:
             current_inputs , z_values = layer.Result(current_inputs, self.weights[i], self.biases[i])
             self.z_values.append(z_values)
             self.output.append(current_inputs)
-   
         self.Calc_Delta(y_true=batch_y)
         self.gradients_poids = []
         self.gradients_biais = []
@@ -216,24 +214,7 @@ def sigmoid_derivative(z):
 
 #*******************************************************************************************************************************************************************************************
 
-# Importer l'image et la normaliser
-# import_image = import_image()
-# inputs = import_image.import_image_npy("Numbers/number.npy")
-# # inputs = import_image.import_image_png("Numbers/number.png")
-# inputs = inputs.flatten()  # Aplatir l'image en un vecteur
-# inputs = inputs / 255.0  # Normaliser les valeurs des pixels entre 0 et 1
 
-# # def Deriver_Partiel(Weights,valeur,Bias,Somepondere,function, Coss):
-# print("Parametrage reseau:")
-# NeuralNetwork1 = NeuralNetwork(inputs_size = 784, numberofLayer=3, Layer_neurons_and_activation=[('sigmoid', 128), ('relu', 64), ('relu', 10)])
-# # sbiais et poids  784*128 +128 *64 + 64*10 poids et 128+63+10 biases
-# print("\nGo:",)
-
-# for i in range(1):
-#     resultat = (NeuralNetwork1.Go(inputs))
-#     # print(resultat)
-#     for i in range(resultat.shape[0]):
-#         print(f"{i}: {resultat[i]*100:.2f}%")
 
 # Créer et entraîner votre réseau
 # NeuralNetwork1 = NeuralNetwork(inputs_size=784, numberofLayer=3, Layer_neurons_and_activation=[('sigmoid', 128), ('relu', 64), ('relu', 10)])
@@ -280,60 +261,85 @@ def load_mnist_data():
     
     return (x_train, y_train_onehot), (x_test, y_test_onehot)
 
-# Charger les données
-(x_train, y_train), (x_test, y_test) = load_mnist_data()
-print(f"Données d'entraînement: {x_train.shape}")
-print(f"Labels d'entraînement: {y_train.shape}")
+# # Charger les données
+# (x_train, y_train), (x_test, y_test) = load_mnist_data()
+# print(f"Données d'entraînement: {x_train.shape}")
+# print(f"Labels d'entraînement: {y_train.shape}")
 
-(x_train, y_train), (x_test, y_test) = load_mnist_data()
+# (x_train, y_train), (x_test, y_test) = load_mnist_data()
 
-# Créer votre réseau
-NeuralNetwork1 = NeuralNetwork(inputs_size=784, numberofLayer=3, 
-                              Layer_neurons_and_activation=[('sigmoid', 128), ('relu', 64), ('relu', 10)])
+# # Créer votre réseau
+# NeuralNetwork1 = NeuralNetwork(inputs_size=784, numberofLayer=3, 
+#                               Layer_neurons_and_activation=[('sigmoid', 128), ('relu', 64), ('relu', 10)])
 
-# Essayer de charger un modèle existant
-if not NeuralNetwork1.load_model("mnist_model_final.pkl"):
-    print("Nouveau modèle créé")
 
-# Entraînement
-epochs = 3
-batch_size = 32
 
-print("Début de l'entraînement...")
-for epoch in range(epochs):
-    # Mélanger les données
-    indices = np.random.permutation(len(x_train))
-    x_train_shuffled = x_train[indices]
-    y_train_shuffled = y_train[indices]
+# # Importer l'image et la normaliser
+# import_image = import_image()
+# inputs = import_image.import_image_npy("Numbers/number.npy")
+# # inputs = import_image.import_image_png("Numbers/number.png")
+# inputs = inputs.flatten()  # Aplatir l'image en un vecteur
+# inputs = inputs / 255.0  # Normaliser les valeurs des pixels entre 0 et 1
+
+# # def Deriver_Partiel(Weights,valeur,Bias,Somepondere,function, Coss):
+# print("Parametrage reseau:")
+# NeuralNetwork1 = NeuralNetwork(inputs_size = 784, numberofLayer=3, Layer_neurons_and_activation=[('sigmoid', 128), ('relu', 64), ('relu', 10)])
+# # sbiais et poids  784*128 +128 *64 + 64*10 poids et 128+63+10 biases
+# print("\nGo:",)
+
+# # # Essayer de charger un modèle existant
+# if not NeuralNetwork1.load_model("mnist_model_final.pkl"):
+#     print("Nouveau modèle créé")
+
+
+
+# for i in range(1):
+#     resultat = (NeuralNetwork1.Go(inputs))
+#     # print(resultat)
+#     for i in range(resultat.shape[0]):
+#         print(f"{i}: {resultat[i]*100:.2f}%")
+
+
+
+# # Entraînement
+# epochs = 3
+# batch_size = 32
+
+# print("Début de l'entraînement...")
+# for epoch in range(epochs):
+#     # Mélanger les données
+#     indices = np.random.permutation(len(x_train))
+#     x_train_shuffled = x_train[indices]
+#     y_train_shuffled = y_train[indices]
     
-    total_loss = 0
-    correct_predictions = 0
+#     total_loss = 0
+#     correct_predictions = 0
     
-    # Entraînement par batch
-    for i in range(0, len(x_train), batch_size):
-        batch_x = x_train_shuffled[i:i+batch_size]
-        batch_y = y_train_shuffled[i:i+batch_size]
+#     # Entraînement par batch
+#     for i in range(0, len(x_train), batch_size):
+#         batch_x = x_train_shuffled[i:i+batch_size]
+#         batch_y = y_train_shuffled[i:i+batch_size]
         
-        for j in range(len(batch_x)):
-            result = NeuralNetwork1.training(batch_x[j], batch_y[j])
+#         for j in range(len(batch_x)):
+#             result = NeuralNetwork1.training(batch_x[j], batch_y[j])
             
-            predicted = np.argmax(result)
-            actual = np.argmax(batch_y[j])
-            if predicted == actual:
-                correct_predictions += 1
+#             predicted = np.argmax(result)
+#             actual = np.argmax(batch_y[j])
+#             if predicted == actual:
+#                 correct_predictions += 1
     
 
-    accuracy = correct_predictions / len(x_train) * 100
-    print(f"Epoch {epoch}: Précision = {accuracy:.2f}%")
-    # Afficher les stats toutes les 50 époques
-    if epoch % 50 == 0:
-        accuracy = correct_predictions / len(x_train) * 100
-        print(f"Epoch {epoch}: Précision = {accuracy:.2f}%")
+#     accuracy = correct_predictions / len(x_train) * 100
+#     print(f"Epoch {epoch}: Précision = {accuracy:.2f}%")
+#     # Afficher les stats toutes les 50 époques
+#     if epoch % 50 == 0:
+#         accuracy = correct_predictions / len(x_train) * 100
+#         print(f"Epoch {epoch}: Précision = {accuracy:.2f}%")
     
-    # Sauvegarder le modèle toutes les 100 époques
-    if epoch % 100 == 0 and epoch > 0:
-        NeuralNetwork1.save_model(f"mnist_model_epoch_{epoch}.pkl")
+#     # Sauvegarder le modèle toutes les 100 époques
+#     if epoch % 100 == 0 and epoch > 0:
+#         NeuralNetwork1.save_model(f"mnist_model_epoch_{epoch}.pkl")
 
-# Sauvegarder le modèle final
-NeuralNetwork1.save_model("mnist_model_final.pkl")
-print("Entraînement terminé!")
+# # Sauvegarder le modèle final
+# NeuralNetwork1.save_model("mnist_model_final.pkl")
+# print("Entraînement terminé!")
