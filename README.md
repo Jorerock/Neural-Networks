@@ -1,4 +1,4 @@
-Learning how Neural Network with numpy and mathplotlib,
+Learning how to Neural Network with numpy and mathplotlib,
 since I've finished my HND exams
 
 
